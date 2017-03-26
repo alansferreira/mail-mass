@@ -5,14 +5,24 @@
     <meta charset="UTF-8">
     <title>Hello World!</title>
     <link rel="stylesheet" href="node_modules/angular-material/angular-material.min.css">
+    <link rel="stylesheet" type="text/css" href="node_modules/trix/dist/trix.css">
 </head>
 
 <body ng-controller="mainControll" ng-cloak>
     <md-toolbar md-scroll-shrink ng-if="true" class="md-accent">
         <div class="md-toolbar-tools">
+            <md-button class="md-icon-button" aria-label="Send" ng-click="send()">
+                <ng-md-icon icon="send"></ng-md-icon>
+            </md-button>
+            
             <h3 flex>
                 <span>Mail-Mass</span>
             </h3>
+
+
+            <md-button class="md-icon-button" aria-label="Attachments" ng-click="addAttachments($event)">
+                <ng-md-icon icon="attach_file"></ng-md-icon>
+            </md-button>
             <md-button class="md-icon-button" aria-label="Discover mails" ng-click="showDiscover($event)">
                 <ng-md-icon icon="email"></ng-md-icon>
             </md-button>
@@ -22,38 +32,24 @@
             
         </div>
     </md-toolbar>
-    <md-content>
-        <div layout="row">
-            <div flex="50" layout="column">
-                <md-list ng-cloak>
-                    <md-subheader>Destinations</md-subheader>
-                    <md-list-item ng-repeat="mail in data.mails">
-                        <p> {{ mail.address }} </p>
-                        <md-checkbox class="md-secondary" ng-model="mail.selected"></md-checkbox>
-                    </md-list-item>
-
-                    <md-divider></md-divider>
-
-                </md-list>
-            </div>
-            <div flex="50" layout="column">
-                <md-input-container flex>
-                    <label>Your E-Mail</label>
-                    <input type="text" ng-model="data.config.mail">
-                </md-input-container>
-                <md-input-container flex>
-                    <label>Your password</label>
-                    <input type="text" ng-model="data.config.password">
-                </md-input-container>
-            </div>
-        </div>
-    </md-content>
+    <div layout="column">
+        <md-chips ng-model="data.message.to" md-transform-chip="addTo($chip)" title="Tip destinations and press enter ..." placeholder="To ...">
+            <md-chip-template>
+                <strong>{{$chip.address}}</strong>
+            </md-chip-template>
+        </md-chips>
+        <md-input-container>
+            <label>Subject</label>
+            <input type="text" ng-model="data.message.subject"/>
+        </md-input-container>
+        <trix-editor angular-trix ng-model="data.message.body"></trix-editor>
+    </div>
 
 
     
 
 </body>
-
+<script type="text/javascript" src="node_modules/trix/dist/trix.js"></script>
 <script>
         // You can also require other files to run in this process
         require('./index.renderer.js');

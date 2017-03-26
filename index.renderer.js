@@ -1,9 +1,18 @@
-require('angular');
-require('angular-material');
-require('angular-material-icons');
-require('linqjs');
+var angular = require('angular');
+var ngMaterial = require('angular-material');
+var ngMaterialIcons = require('angular-material-icons');
+var ngTrix = require('angular-trix')
+var linqjs = require('linqjs');
 
-var app = angular.module('app', ['ngMaterial', 'ngMdIcons']);
+var path = require('path');
+
+var nodemailer = require('nodemailer');
+
+var app = require('electron').remote; 
+var dialog = app.dialog;
+
+
+var app = angular.module('app', ['ngMaterial', 'ngMdIcons', 'angularTrix']);
 app.config(function ($mdThemingProvider) {
     $mdThemingProvider
         .theme('default')
@@ -15,10 +24,25 @@ app.config(function ($mdThemingProvider) {
 var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
     $scope.data = {
         dicoverText: "", 
-
-        mails: [], 
+        message: {
+            subject: "", 
+            to: [], 
+            body: "", 
+            attachments: []
+        },
         config: {
-            smtp: 'smtp.google.com'
+            smtp: 'smtp-mail.outlook.com', 
+            user: 'yourmail.mail.com', 
+            password: 'yourpass', 
+            service: 'Hotmail', 
+            services: [
+                '1und1', 'AOL', 'DebugMail.io', 'DynectEmail', 'FastMail'
+                , 'GandiMail', 'Gmail', 'Godaddy', 'GodaddyAsia', 'GodaddyEurope'
+                , 'hot.ee', 'Hotmail', 'iCloud', 'mail.ee', 'Mail.ru', 'Mailgun', 'Mailjet'
+                , 'Mailosaur', 'Mandrill', 'Naver', 'OpenMailBox', 'Outlook365', 'Postmark'
+                , 'QQ', 'QQex', 'SendCloud', 'SendGrid', 'SendinBlue', 'SES', 'SES-US-EAST-1'
+                , 'SES-US-WEST-2', 'SES-EU-WEST-1', 'Sparkpost', 'Yahoo', 'Yandex', 'Zoho'                
+            ]
         }
     };
     $scope.msg = 'hello angu!';
@@ -35,19 +59,19 @@ var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
         })
         .then(function (text) {
             $scope.data.dicoverText = text.replace(/[\t|\r|\n]/img, " ");
-            $scope.data.mails = [];
+            $scope.data.message.to = [];
 
             var mailRegex = /[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*/img;
             
             iterateRegex(mailRegex, text, function (regexp, inputText, match) {
                 inputText = inputText.substring(0, match.index) + inputText.substring(match.index + match[0].length);
-                $scope.data.mails.push({address: match.toString(), selected: true});
+                $scope.data.message.to.push({address: match.toString(), selected: true});
                 // put your stuffs here
             });
-            $scope.data.mails = $scope.data.mails.distinct().orderBy(function(m){ return m.address});
+            $scope.data.message.to = $scope.data.message.to.distinct().orderBy(function(m){ return m.address});
 
             // while(match = mailRegex.exec($scope.data.dicoverText)){
-            //     $scope.data.mails.push(match.toString());
+            //     $scope.data.message.to.push(match.toString());
             // }
 
         }, function () {
@@ -83,7 +107,62 @@ var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
         $scope.ok = function(data) {
             $mdDialog.hide(data);
         };
-    }
+    };
+
+    $scope.addAttachments = function(){
+        var files = dialog.showOpenDialog({properties: ['openFile', 'multiSelections']});
+        $scope.data.message.attachments = $scope.data.message.attachments.concat(files);
+    };
+
+    $scope.addTo = function(chip){
+        return { address: chip}  ;
+    };
+
+    $scope.send = function(){
+        // create reusable transporter object using the default SMTP transport
+        let transporter = nodemailer.createTransport({
+            service: 'outlook',
+            auth: {
+                user: $scope.data.config.user,
+                pass: $scope.data.config.password
+            }
+        });
+        var destinations = [].concat($scope.data.message.to);
+        var attachments = $scope.data.message.attachments || [];
+        
+        attachments = attachments
+                      .select(function(attachment){
+                         return {filename: path.basename(attachment), path: attachment};
+                      });
+        
+        function sendMail(to){
+            // setup email data with unicode symbols
+            var literalName = $scope.data.config.userName || $scope.data.config.user;
+            let mailOptions = {
+                from: '"' + literalName + '" <' + $scope.data.config.user + '>', // sender address
+                to: to, // list of receivers
+                subject: $scope.data.message.subject, // Subject line
+                html: $scope.data.message.body,  // html body
+                attachments: attachments
+            };
+
+            // send mail with defined transport object
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) return console.log(error);
+
+                console.log('Message %s sent: %s', info.messageId, info.response);
+
+                if(destinations.length > 0) sendMail(destinations.pop());
+
+            });
+        
+        };
+
+        sendMail(destinations.pop());
+
+        
+    };
+
 });
 
 /**
@@ -107,3 +186,5 @@ function iterateRegex(regexp, inputText, callback) {
     }
 
 };
+
+

@@ -5,22 +5,16 @@
             <div layout="column">
                 <md-input-container>
                     <label>Mail/User</label>
-                    <input type="email" ng-model='data.mail'/>
+                    <input type="email" ng-model='data.user'/>
                 </md-input-container>
                 <md-input-container>
                     <label>Password</label>
                     <input ng-model='data.password'/>
                 </md-input-container>
-            </div>
-            <div layout="row">
-                <md-input-container flex="80">
-                    <label>SMTP Address</label>
-                    <input ng-model='data.smtp'/>
-                </md-input-container>
-                <md-input-container>
-                    <label>SMTP Port</label>
-                    <input ng-model='data.port'/>
-                </md-input-container>
+
+                <md-select ng-model="data.service" placeholder="Service">
+                    <md-option ng-repeat='service in data.services' ng-value="service">{{service}}</md-option>
+                </md-select>
             </div>
         </div>
     </md-dialog-content>
