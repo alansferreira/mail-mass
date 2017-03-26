@@ -1,0 +1,22 @@
+<md-dialog aria-label="Discover Mails">
+    <md-dialog-content>
+        <div class="md-dialog-content">
+            <h2>You can dicover mails from complex text</h2>
+            <p>
+                <md-input-container>
+                    <label >Text to estract mails</label>
+                    <textarea cols="30" rows="10" ng-model='data'></textarea>
+                </md-input-container>
+            </p>
+        </div>
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+        <md-button ng-click="ok(data)">
+            Discover all
+        </md-button>
+        <md-button ng-click="cancel()">
+            Cancel
+        </md-button>
+    </md-dialog-actions>
+</md-dialog>

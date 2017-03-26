@@ -1,0 +1,36 @@
+<md-dialog aria-label="Discover Mails">
+    <md-dialog-content>
+        <div class="md-dialog-content">
+            <md-subheader>Put sender configurations</md-subheader>
+            <div layout="column">
+                <md-input-container>
+                    <label>Mail/User</label>
+                    <input type="email" ng-model='data.mail'/>
+                </md-input-container>
+                <md-input-container>
+                    <label>Password</label>
+                    <input ng-model='data.password'/>
+                </md-input-container>
+            </div>
+            <div layout="row">
+                <md-input-container flex="80">
+                    <label>SMTP Address</label>
+                    <input ng-model='data.smtp'/>
+                </md-input-container>
+                <md-input-container>
+                    <label>SMTP Port</label>
+                    <input ng-model='data.port'/>
+                </md-input-container>
+            </div>
+        </div>
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+        <md-button ng-click="ok(data)">
+            Discover all
+        </md-button>
+        <md-button ng-click="cancel()">
+            Cancel
+        </md-button>
+    </md-dialog-actions>
+</md-dialog>
