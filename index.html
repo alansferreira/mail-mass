@@ -18,6 +18,7 @@
             <h3 flex>
                 <span>Mail-Mass</span>
             </h3>
+            <span>Sending to: {{sendingTo.address}}</span>
 
 
             <md-button class="md-icon-button" aria-label="Attachments" ng-click="addAttachments($event)">
@@ -32,10 +33,15 @@
             
         </div>
     </md-toolbar>
+    <md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
     <div layout="column">
         <md-chips ng-model="data.message.to" md-transform-chip="addTo($chip)" title="Tip destinations and press enter ..." placeholder="To ...">
             <md-chip-template>
-                <strong>{{$chip.address}}</strong>
+                <span ng-if="!$chip.sending">{{$chip.address}}</span>
+                <strong ng-if="$chip.sending">{{$chip.address}}</strong>
+                <em ng-if="$chip.sended">(sended)</em>
+                <em ng-if="$chip.error" md-colors="{color: 'red'}">(error)</em>
+                <em ng-if="$chip.sending">(sending...)</em>
             </md-chip-template>
         </md-chips>
         <md-input-container>
@@ -43,8 +49,10 @@
             <input type="text" ng-model="data.message.subject"/>
         </md-input-container>
         <trix-editor angular-trix ng-model="data.message.body"></trix-editor>
+        
+        <md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
+        
     </div>
-
 
     
 

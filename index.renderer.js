@@ -65,10 +65,10 @@ var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
             
             iterateRegex(mailRegex, text, function (regexp, inputText, match) {
                 inputText = inputText.substring(0, match.index) + inputText.substring(match.index + match[0].length);
-                $scope.data.message.to.push({address: match.toString(), selected: true});
+                $scope.data.message.to.push(match.toString());
                 // put your stuffs here
             });
-            $scope.data.message.to = $scope.data.message.to.distinct().orderBy(function(m){ return m.address});
+            $scope.data.message.to = $scope.data.message.to.distinct().orderBy(function(m){return m;}).select(function(m){return {address: m, selected: true};});
 
             // while(match = mailRegex.exec($scope.data.dicoverText)){
             //     $scope.data.message.to.push(match.toString());
@@ -119,47 +119,78 @@ var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
     };
 
     $scope.send = function(){
-        // create reusable transporter object using the default SMTP transport
-        let transporter = nodemailer.createTransport({
-            service: 'outlook',
-            auth: {
-                user: $scope.data.config.user,
-                pass: $scope.data.config.password
-            }
-        });
-        var destinations = [].concat($scope.data.message.to);
-        var attachments = $scope.data.message.attachments || [];
-        
-        attachments = attachments
-                      .select(function(attachment){
-                         return {filename: path.basename(attachment), path: attachment};
-                      });
-        
-        function sendMail(to){
-            // setup email data with unicode symbols
-            var literalName = $scope.data.config.userName || $scope.data.config.user;
-            let mailOptions = {
-                from: '"' + literalName + '" <' + $scope.data.config.user + '>', // sender address
-                to: to, // list of receivers
-                subject: $scope.data.message.subject, // Subject line
-                html: $scope.data.message.body,  // html body
-                attachments: attachments
+        setTimeout(function(){
+
+            // create reusable transporter object using the default SMTP transport
+            let transporter = nodemailer.createTransport({
+                service: 'outlook',
+                auth: {
+                    user: $scope.data.config.user,
+                    pass: $scope.data.config.password
+                }
+            });
+            var destinations = [].concat($scope.data.message.to);
+            var attachments = $scope.data.message.attachments || [];
+            var destinationIndex = 0;
+
+            attachments = attachments
+                        .select(function(attachment){
+                            return {filename: path.basename(attachment), path: attachment};
+                        });
+            
+            function sendMail(){
+                var to = $scope.data.message.to[destinationIndex];
+                $scope.sendingTo = to;
+                destinationIndex++;
+                $scope.$apply(function() {
+                    $scope.progress = (destinationIndex * 100) / $scope.data.message.to.length;
+                    to.sended = false;
+                    to.error = false;
+                    to.sending = true;
+                });
+                
+                // setup email data with unicode symbols
+                var literalName = $scope.data.config.userName || $scope.data.config.user;
+                let mailOptions = {
+                    from: '"' + literalName + '" <' + $scope.data.config.user + '>', // sender address
+                    to: to, // list of receivers
+                    subject: $scope.data.message.subject, // Subject line
+                    html: $scope.data.message.body,  // html body
+                    attachments: attachments
+                };
+
+                // send mail with defined transport object
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                        $scope.$apply(function() {
+                            $scope.progress = (destinationIndex * 100) / $scope.data.message.to.length;
+                            to.sended = false;
+                            to.error = true;
+                            to.sending = false;
+                        });
+                        if(destinationIndex < destinations.length) sendMail();
+                        return;
+                    }
+
+                    $scope.$apply(function() {
+                        $scope.progress = (destinationIndex * 100) / $scope.data.message.to.length;
+                        to.sended = true;
+                        to.error = false;
+                        to.sending = false;
+                    });
+
+                    console.log('Message %s sent: %s', info.messageId, info.response);
+
+                    if(destinationIndex < destinations.length) sendMail();
+
+                });
+            
             };
 
-            // send mail with defined transport object
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) return console.log(error);
+            sendMail();
 
-                console.log('Message %s sent: %s', info.messageId, info.response);
-
-                if(destinations.length > 0) sendMail(destinations.pop());
-
-            });
-        
-        };
-
-        sendMail(destinations.pop());
-
+        }, 200);
         
     };
 
