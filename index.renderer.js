@@ -1,3 +1,4 @@
+var Datastore = require('nedb');
 var angular = require('angular');
 var ngMaterial = require('angular-material');
 var ngMaterialIcons = require('angular-material-icons');
@@ -8,11 +9,16 @@ var path = require('path');
 
 var nodemailer = require('nodemailer');
 
-var app = require('electron').remote; 
-var dialog = app.dialog;
+var electron = require('electron').remote; 
+var dialog = electron.dialog;
 
+var db = new Datastore({ filename: __dirname + '/profiles/main.nedb' })
+db.loadDatabase();
 
 var app = angular.module('app', ['ngMaterial', 'ngMdIcons', 'angularTrix']);
+
+var _currentWindow = electron.getCurrentWindow();
+
 app.config(function ($mdThemingProvider) {
     $mdThemingProvider
         .theme('default')
@@ -31,7 +37,6 @@ var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
             attachments: []
         },
         config: {
-            smtp: 'smtp-mail.outlook.com', 
             user: 'yourmail.mail.com', 
             password: 'yourpass', 
             service: 'Hotmail', 
@@ -45,7 +50,16 @@ var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
             ]
         }
     };
-    $scope.msg = 'hello angu!';
+
+    db.findOne({}, function (err, doc) {
+        var _apply = function(_err, _doc){$scope.data = _doc;};
+
+        if(err || !doc) {
+            db.insert($scope.data, _apply);
+            return;
+        }
+        _apply(err, doc);
+    });
 
     $scope.showDiscover = function (ev) {
         $mdDialog.show({
@@ -109,8 +123,23 @@ var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
         };
     };
 
+    $scope.saveProfile = function(){
+        var data = Object.assign({}, $scope.data);
+        data.message.attachments.forEach(function(a){delete a.$$hashKey;});
+        data.message.to.forEach(function(t){delete t.$$hashKey;});
+        data.config.password = null;
+
+        db.update({_id: data._id}, data, {}, function(err, numReplaced){
+            if(err) return console.log('not saved');
+            console.log('saved!')
+        });
+    };
+
     $scope.addAttachments = function(){
         var files = dialog.showOpenDialog({properties: ['openFile', 'multiSelections']});
+        files = files.select(function(f){
+                            return {filename: path.basename(f), path: f};
+                        });
         $scope.data.message.attachments = $scope.data.message.attachments.concat(files);
     };
 
@@ -133,11 +162,6 @@ var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
             var attachments = $scope.data.message.attachments || [];
             var destinationIndex = 0;
 
-            attachments = attachments
-                        .select(function(attachment){
-                            return {filename: path.basename(attachment), path: attachment};
-                        });
-            
             function sendMail(){
                 var to = $scope.data.message.to[destinationIndex];
                 $scope.sendingTo = to;

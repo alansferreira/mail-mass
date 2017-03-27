@@ -12,7 +12,8 @@
     <md-toolbar md-scroll-shrink ng-if="true" class="md-accent">
         <div class="md-toolbar-tools">
             <md-button class="md-icon-button" aria-label="Send" ng-click="send()">
-                <ng-md-icon icon="send"></ng-md-icon>
+                <ng-md-icon icon="send" md-colors="{fill: 'primary'}"></ng-md-icon>
+                <md-tooltip>Start sending</md-tooltip>
             </md-button>
             
             <h3 flex>
@@ -21,36 +22,60 @@
             <span>Sending to: {{sendingTo.address}}</span>
 
 
-            <md-button class="md-icon-button" aria-label="Attachments" ng-click="addAttachments($event)">
-                <ng-md-icon icon="attach_file"></ng-md-icon>
+            <md-button class="md-icon-button" ng-click="saveProfile($event)">
+                <ng-md-icon icon="save" md-colors="{fill: 'grey'}"></ng-md-icon>
+                <md-tooltip>Save current profile</md-tooltip>
             </md-button>
-            <md-button class="md-icon-button" aria-label="Discover mails" ng-click="showDiscover($event)">
-                <ng-md-icon icon="email"></ng-md-icon>
-            </md-button>
-            <md-button class="md-icon-button" aria-label="Config" ng-click="showConfig($event)">
-                <ng-md-icon icon="more_vert"></ng-md-icon>
+            <md-button class="md-icon-button" ng-click="showConfig($event)">
+                <ng-md-icon icon="more_vert" md-colors="{fill: 'grey'}"></ng-md-icon>
+                <md-tooltip>SMTP and auth stuffs...</md-tooltip>
             </md-button>
             
         </div>
     </md-toolbar>
-    <md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
-    <div layout="column">
-        <md-chips ng-model="data.message.to" md-transform-chip="addTo($chip)" title="Tip destinations and press enter ..." placeholder="To ...">
-            <md-chip-template>
-                <span ng-if="!$chip.sending">{{$chip.address}}</span>
-                <strong ng-if="$chip.sending">{{$chip.address}}</strong>
-                <em ng-if="$chip.sended">(sended)</em>
-                <em ng-if="$chip.error" md-colors="{color: 'red'}">(error)</em>
-                <em ng-if="$chip.sending">(sending...)</em>
-            </md-chip-template>
-        </md-chips>
+    <div layout="column" layout-padding>
+        <div>
+            <md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
+        </div>
+        <div layout="row">
+            <md-input-container flex>
+                <label>Attachments</label>
+                <md-chips ng-model="data.message.attachments"  title="Attachments ..." placeholder="Attachments ..." readonly="true" md-removable="true">
+                    <md-chip-template>
+                        <strong>{{$chip.filename}}</strong>
+                        <em>{{$chip.path}}</em>
+                    </md-chip-template>
+                </md-chips>
+            </md-input-container>
+            <md-button class="md-icon-button" ng-click="addAttachments($event)">
+                <ng-md-icon icon="more_horiz" md-colors="{fill: 'primary'}"></ng-md-icon>
+                <md-tooltip>Add attachments ...</md-tooltip>
+            </md-button>
+        </div>
+        <div layout="row">
+            <md-chips flex ng-model="data.message.to" md-transform-chip="addTo($chip)" title="Tip destinations and press enter ..." placeholder="To ...">
+                <md-chip-template>
+                    <span ng-if="!$chip.sending">{{$chip.address}}</span>
+                    <strong ng-if="$chip.sending">{{$chip.address}}</strong>
+                    <em ng-if="$chip.sended">(sended)</em>
+                    <em ng-if="$chip.error" md-colors="{color: 'red'}">(error)</em>
+                    <em ng-if="$chip.sending">(sending...)</em>
+                </md-chip-template>
+            </md-chips>
+            <md-button class="md-icon-button" ng-click="showDiscover($event)">
+                <ng-md-icon icon="filter_9_plus" md-colors="{fill: 'primary'}"></ng-md-icon>
+                <md-tooltip>Add multiple or discover multiples mails ...</md-tooltip>
+            </md-button>
+        </div>
         <md-input-container>
             <label>Subject</label>
             <input type="text" ng-model="data.message.subject"/>
         </md-input-container>
         <trix-editor angular-trix ng-model="data.message.body"></trix-editor>
         
-        <md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
+        <div>
+            <md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
+        </div>
         
     </div>
 
