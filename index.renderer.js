@@ -12,7 +12,7 @@ var nodemailer = require('nodemailer');
 var electron = require('electron').remote; 
 var dialog = electron.dialog;
 
-var db = new Datastore({ filename: __dirname + '/profiles/main.nedb' })
+var db = new Datastore({ filename: __dirname + '/main.nedb' })
 db.loadDatabase();
 
 var app = angular.module('app', ['ngMaterial', 'ngMdIcons', 'angularTrix']);
