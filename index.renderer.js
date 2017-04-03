@@ -137,13 +137,10 @@ var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
 
     $scope.addAttachments = function(){
         var files = dialog.showOpenDialog({properties: ['openFile', 'multiSelections']});
-<<<<<<< HEAD
         if(!files) return;
-=======
         files = files.select(function(f){
                             return {filename: path.basename(f), path: f};
                         });
->>>>>>> 978d861227b8fbe27ad607a5cbf050a67025ad62
         $scope.data.message.attachments = $scope.data.message.attachments.concat(files);
     };
 
