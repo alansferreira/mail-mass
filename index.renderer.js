@@ -111,6 +111,7 @@ var mainControll = app.controller('mainControll', function ($scope, $mdDialog) {
 
     $scope.addAttachments = function(){
         var files = dialog.showOpenDialog({properties: ['openFile', 'multiSelections']});
+        if(!files) return;
         $scope.data.message.attachments = $scope.data.message.attachments.concat(files);
     };
 
