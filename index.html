@@ -3,58 +3,87 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>Welcome to electron Mail mass application!</title>
     <link rel="stylesheet" href="node_modules/angular-material/angular-material.min.css">
     <link rel="stylesheet" type="text/css" href="node_modules/trix/dist/trix.css">
+    <style>
+        body{
+            margin: 2px;
+            -webkit-app-region: drag;
+        }
+        .no-drag {
+            -webkit-app-region: no-drag;
+        }
+    </style>
 </head>
 
 <body ng-controller="mainControll" ng-cloak>
-    <md-toolbar md-scroll-shrink ng-if="true" class="md-accent">
-        <div class="md-toolbar-tools">
-            <md-button class="md-icon-button" aria-label="Send" ng-click="send()">
-                <ng-md-icon icon="send"></ng-md-icon>
+    <md-toolbar md-scroll-shrink ng-if="true" class="md-accent drag-window">
+        <div class="md-toolbar-tools titlebar">
+            <md-button class="md-icon-button  no-drag" aria-label="Send" ng-click="send()">
+                <ng-md-icon icon="send" md-colors="{fill: 'primary'}"></ng-md-icon>
+                <md-tooltip>Start sending</md-tooltip>
             </md-button>
             
-            <h3 flex>
-                <span>Mail-Mass</span>
-            </h3>
-            <span>Sending to: {{sendingTo.address}}</span>
+            <span flex>Sending to: {{sendingTo.address}}</span>
 
 
-            <md-button class="md-icon-button" aria-label="Attachments" ng-click="addAttachments($event)">
-                <ng-md-icon icon="attach_file"></ng-md-icon>
+            <md-button class="md-icon-button no-drag" ng-click="saveProfile($event)">
+                <ng-md-icon icon="save" md-colors="{fill: 'grey'}"></ng-md-icon>
+                <md-tooltip>Save current profile</md-tooltip>
             </md-button>
-            <md-button class="md-icon-button" aria-label="Discover mails" ng-click="showDiscover($event)">
-                <ng-md-icon icon="email"></ng-md-icon>
-            </md-button>
-            <md-button class="md-icon-button" aria-label="Config" ng-click="showConfig($event)">
-                <ng-md-icon icon="more_vert"></ng-md-icon>
+            <md-button class="md-icon-button no-drag" ng-click="showConfig($event)">
+                <ng-md-icon icon="more_vert" md-colors="{fill: 'grey'}"></ng-md-icon>
+                <md-tooltip>SMTP and auth stuffs...</md-tooltip>
             </md-button>
             
         </div>
     </md-toolbar>
-    <md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
-    <div layout="column">
-        <md-chips ng-model="data.message.to" md-transform-chip="addTo($chip)" title="Tip destinations and press enter ..." placeholder="To ...">
-            <md-chip-template>
-                <span ng-if="!$chip.sending">{{$chip.address}}</span>
-                <strong ng-if="$chip.sending">{{$chip.address}}</strong>
-                <em ng-if="$chip.sended">(sended)</em>
-                <em ng-if="$chip.error" md-colors="{color: 'red'}">(error)</em>
-                <em ng-if="$chip.sending">(sending...)</em>
-            </md-chip-template>
-        </md-chips>
-        <md-input-container>
+    <div layout="column" layout-padding style="overflow-y: auto">
+        <div>
+            <md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
+        </div>
+        <div layout="row">
+            <md-input-container flex class=" no-drag">
+                <label>Attachments</label>
+                <md-chips ng-model="data.message.attachments"  title="Attachments ..." placeholder="Attachments ..." readonly="true" md-removable="true">
+                    <md-chip-template>
+                        <strong>{{$chip.filename}}</strong>
+                        <em>{{$chip.path}}</em>
+                    </md-chip-template>
+                </md-chips>
+            </md-input-container>
+            <md-button class="md-icon-button no-drag" ng-click="addAttachments($event)">
+                <ng-md-icon icon="more_horiz" md-colors="{fill: 'primary'}"></ng-md-icon>
+                <md-tooltip>Add attachments ...</md-tooltip>
+            </md-button>
+        </div>
+        <div layout="row">
+            <md-chips flex ng-model="data.message.to"  class=" no-drag" md-transform-chip="addTo($chip)" title="Tip destinations and press enter ..." placeholder="To ...">
+                <md-chip-template>
+                    <span ng-if="!$chip.sending">{{$chip.address}}</span>
+                    <strong ng-if="$chip.sending">{{$chip.address}}</strong>
+                    <em ng-if="$chip.sended">(sended)</em>
+                    <em ng-if="$chip.error" md-colors="{color: 'red'}">(error)</em>
+                    <em ng-if="$chip.sending">(sending...)</em>
+                </md-chip-template>
+            </md-chips>
+            <md-button class="md-icon-button no-drag" ng-click="showDiscover($event)">
+                <ng-md-icon icon="filter_9_plus" md-colors="{fill: 'primary'}"></ng-md-icon>
+                <md-tooltip>Add multiple or discover multiples mails ...</md-tooltip>
+            </md-button>
+        </div>
+        <md-input-container class=" no-drag">
             <label>Subject</label>
             <input type="text" ng-model="data.message.subject"/>
         </md-input-container>
-        <trix-editor angular-trix ng-model="data.message.body"></trix-editor>
+        <trix-editor angular-trix ng-model="data.message.body" class=" no-drag"></trix-editor>
         
-        <md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
+        <div>
+            <md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
+        </div>
         
     </div>
-
-    
 
 </body>
 <script type="text/javascript" src="node_modules/trix/dist/trix.js"></script>
